@@ -131,20 +131,14 @@
                 <TextBlock Text="{Binding ElementName=figure, Path=EndBezierPoint, StringFormat=F0}"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
-                <CheckBox IsChecked="{Binding IsAnimated, Mode=TwoWay}">
-                    <TextBlock Foreground="White" Text="Animate: "/>
-                </CheckBox>
-                <TextBlock Text="Speed: "/>
-				<Slider Width="100" Minimum="0.1" Maximum="5" Value="{Binding Speed, Mode=TwoWay}"/>
-				<Slider Width="100" Minimum="4" Maximum="35" Value="{Binding NumPoints, Mode=TwoWay}"/>
+					<TextBlock Text="Num of Points: "/>
+					<Slider Width="100" Minimum="4" Maximum="35" Value="{Binding NumPoints, Mode=TwoWay}"/>
 			</StackPanel>
         </StackPanel>
         
         <StackPanel DockPanel.Dock="Top" Background="Gray" TextElement.Foreground="White">
             <TextBlock Text="Drag points to change the bezier figure"/>
-            <TextBlock Text="Use the Animate checkbox to create random animation of the figure"/>
-            <TextBlock Text="NOTE: after turning on animations, drag will no longer works"/>
-        </StackPanel>
+			</StackPanel>
         
         <Border DockPanel.Dock="Top" BorderBrush="Black" BorderThickness="1">
 			<Grid>
