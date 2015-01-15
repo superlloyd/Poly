@@ -4,7 +4,6 @@ It contains all the code needed to Point to BezierSegment distance measurement.
 It turned out to be quite a lot of Math!
 
 One need:
-- Complex arithmetic (check, Complex.cs)
 - Polynomial class with the following operation
 	- + - * /
 	Derivate()
