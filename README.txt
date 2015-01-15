@@ -16,6 +16,11 @@ Finally in PolygonUtils there are the (now very simple) measurement methods
 
 
 
+Introduction on CodeProject
+---------------------------
+http://www.codeproject.com/Tips/865874/Polynomial-class-with-FindRoots-method
+
+
 CREDITS
 =======
 Special Thanks to "Jeremy Alles" for his Bezier Demo
