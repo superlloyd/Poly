@@ -294,7 +294,7 @@ namespace BRPWorld.Utils.Utils
 		/// This method use the Durand-Kerner aka Weierstrass algorithm to find approximate root of this polynomial.
 		/// http://en.wikipedia.org/wiki/Durand%E2%80%93Kerner_method
 		/// </summary>
-		public Complex[] FindRoots(int maxIteration = 20)
+		public Complex[] FindRoots()
 		{
 			var p = this.Normalize();
 			if (p.coefficients.Length == 1) return new Complex[0];
@@ -336,9 +336,8 @@ namespace BRPWorld.Utils.Utils
 				}
 				return true;
 			};
-			int iStep = 0;
 			bool close = false;
-			while (!close && iStep++ < maxIteration)
+			do
 			{
 				step();
 				close = closeEnough();
@@ -347,6 +346,7 @@ namespace BRPWorld.Utils.Utils
 				R0 = R1;
 				R1 = tmp;
 			}
+			while (!close);
 
 			return R0;
 		}
