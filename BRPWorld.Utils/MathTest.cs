@@ -3,6 +3,7 @@ using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -74,25 +75,6 @@ namespace Utils.Tests
 			{
 				Assert.IsTrue(negligible(p.Compute(r)));
 			}
-		}
-
-		[Test]
-		public void TestComplex()
-		{
-			Action<Complex, Complex> eq = (c1, c2) =>
-			{
-				var c = c1 - c2;
-				Assert.IsTrue(Math.Abs(c.Real) < Polynomial.Epsilon && Math.Abs(c.Imaginary) < Polynomial.Epsilon);
-			};
-
-			var C1 = 2 + 3 * Complex.I;
-			var C2 = C1 * C1;
-			eq(C2, -5 + 12 * Complex.I);
-			var C3 = C2 / C1;
-			eq(C1, C3);
-
-			var p = new Polynomial(1, 1, 2);
-			eq(p.Compute(2 - Complex.I), 9 - 9 * Complex.I);
 		}
 	}
 }

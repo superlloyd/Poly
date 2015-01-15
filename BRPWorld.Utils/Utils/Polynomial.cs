@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -300,7 +301,7 @@ namespace BRPWorld.Utils.Utils
 			if (p.coefficients.Length == 1) return new Complex[0];
 
 			Complex x0 = 1;
-			Complex xMul = 0.4 + 0.9 * Complex.I;
+			Complex xMul = 0.4 + 0.9 * Complex.ImaginaryOne;
 			var R0 = new Complex[p.coefficients.Length - 1];
 			for (int i = 0; i < R0.Length; i++)
 			{
