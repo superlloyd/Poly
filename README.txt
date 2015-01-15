@@ -12,4 +12,4 @@ One need:
 	Compute(x), of course! for double and Complex
 	BezierEquations
 
-Find in PolygonUtils there are the (now very simple) measurement methods
+Finally in PolygonUtils there are the (now very simple) measurement methods
