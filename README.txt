@@ -13,3 +13,11 @@ One need:
 	BezierEquations
 
 Finally in PolygonUtils there are the (now very simple) measurement methods
+
+
+
+CREDITS
+=======
+Special Thanks to "Jeremy Alles" for his Bezier Demo
+http://www.japf.fr/2009/07/beziersegment-demo-application/
+Which I used as the basis of my visual test.
