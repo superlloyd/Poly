@@ -127,6 +127,13 @@ namespace BRPWorld.Utils.Utils
 				res[i] = m * p.coefficients[i];
 			return new Polynomial(res);
 		}
+		public static Polynomial operator /(Polynomial p, double m)
+		{
+			var res = new double[p.coefficients.Length];
+			for (int i = 0; i < res.Length; i++)
+				res[i] = p.coefficients[i] / m;
+			return new Polynomial(res);
+		}
 		public static Polynomial operator *(Polynomial a, Polynomial b)
 		{
 			var res = new double[a.coefficients.Length + b.coefficients.Length - 1];
