@@ -343,8 +343,9 @@ namespace BRPWorld.Utils.Utils
 				step();
 				close = closeEnough();
 
-				for (int i = 0; i < R0.Length; i++)
-					R0[i] = R1[i];
+				var tmp = R0;
+				R0 = R1;
+				R1 = tmp;
 			}
 
 			return R0;
