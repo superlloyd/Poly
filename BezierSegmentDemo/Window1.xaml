@@ -149,6 +149,7 @@
 						EndBezierPoint="400,80"
 						EndPoint="450,300"/>
 						<TextBlock Background="Yellow" 
+								   IsHitTestVisible="False"
 								   Text="{Binding MeasureMessage}" 
 								   Canvas.Top="{Binding Point.Y, ElementName=distance}"
 								   Canvas.Left="{Binding Point.X, ElementName=distance}"
