@@ -13,7 +13,9 @@ namespace BRPWorld.Utils.Utils
 
 		public static double DistanceToPoint(this Point p, Point p2)
 		{
-			return Math.Sqrt((p.X - p2.X) * (p.Y - p2.Y));
+			var dx = p.X - p2.X;
+			var dy = p.Y - p2.Y;
+			return Math.Sqrt(dx * dx + dy * dy);
 		}
 
 		public static Point ClosestPointOnSegment(this Point p, Point start, Point end)
