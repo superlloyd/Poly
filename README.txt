@@ -1,17 +1,18 @@
 This class is an excerpt from my personal project.
 
-It contains all the code needed to Point to BezierSegment distance measurement.
-It turned out to be quite a lot of Math!
+This class is a little show case for a Polynomial class I worked on
 
-One need:
+Supported operation:
 - Polynomial class with the following operation
 	- + - * /
-	Derivate()
-	FindRoots() (i.e. value for which the Polynomial compute to 0)
-	Compute(x), of course! for double and Complex
-	BezierEquations
+	Derivate Integrate
+	FindRoots (Polynomial root solver, i.e. value for which the Polynomial compute to 0)
+	Compute, of course! for double and Complex
+	Bezier Equations
 
-Finally in PolygonUtils there are the (now very simple) measurement methods
+
+Finally in PolygonUtils there are the (now very simple) measurement methods, demonstrate by
+calculate shortest distance to Bezier Segment with WPF demo.
 
 
 
