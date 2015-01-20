@@ -1,19 +1,17 @@
-This class is an excerpt from my personal project.
+This projet demonstrate a Polynomial utility class
 
-It contains all the code needed to Point to BezierSegment distance measurement.
-It turned out to be quite a lot of Math!
-
-One need:
-- Polynomial class with the following operation
+It supports the following operations:
 	- + - * /
-	Derivate()
-	FindRoots() (i.e. value for which the Polynomial compute to 0)
-	Compute(x), of course! for double and Complex
-	BezierEquations
+	Derivate Integrate
+	FindRoots (Polynomial root solver, i.e. value for which the Polynomial compute to 0)
+	Compute, of course! for double and Complex
+	Bezier Equations
 
-Finally in PolygonUtils there are the (now very simple) measurement methods
+It was mostly used (so far) to calculate distance to Bezier Segments, with the PolygonUtils class, which has the following methods:
+	Distance To Bezier
+	Distance To Segment
 
-
+It comes with unit test a a test WPF applications.
 
 Introduction on CodeProject
 ---------------------------
