@@ -1,9 +1,6 @@
-This class is an excerpt from my personal project.
-
-This class is a little show case for a Polynomial class I worked on
+This projet demonstrate a Polynomial utility class
 
 Supported operation:
-- Polynomial class with the following operation
 	- + - * /
 	Derivate Integrate
 	FindRoots (Polynomial root solver, i.e. value for which the Polynomial compute to 0)
@@ -11,8 +8,10 @@ Supported operation:
 	Bezier Equations
 
 
-Finally in PolygonUtils there are the (now very simple) measurement methods, demonstrate by
-calculate shortest distance to Bezier Segment with WPF demo.
+Finally in PolygonUtils there are the some measurement methods
+(illustrated in the WPF demo)
+	Distance To Bezier
+	Distance To Segment
 
 
 
