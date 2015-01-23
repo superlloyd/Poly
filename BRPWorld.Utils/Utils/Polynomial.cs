@@ -327,13 +327,12 @@ namespace BRPWorld.Utils.Utils
 					R1[i] = R0[i] - p.Compute(R0[i]) / divider(i);
 				}
 			};
-			Predicate<Complex> negligible = c => Math.Abs(c.Real) <= Epsilon && Math.Abs(c.Imaginary) <= Epsilon;
 			Func<bool> closeEnough = () =>
 			{
 				for (int i = 0; i < R0.Length; i++)
 				{
 					var c = R0[i] - R1[i];
-					if (!negligible(c)) return false;
+					if (Math.Abs(c.Real) > Epsilon || Math.Abs(c.Imaginary) > Epsilon) return false;
 				}
 				return true;
 			};
