@@ -46,7 +46,7 @@ namespace BezierSegmentDemo
 
 		void UpdateMeasure()
 		{
-			var bezier = PolygonUtils.CubicBezierCurve(figure.StartPoint, figure.StartBezierPoint, figure.EndBezierPoint, figure.EndPoint);
+			var bezier = PolygonUtils.CubicBezier(figure.StartPoint, figure.StartBezierPoint, figure.EndBezierPoint, figure.EndPoint);
 			MeasureMessage = string.Format("Distance to Curve: {0}", bezier.DistanceTo(MeasurePoint.ToArray(), 0, 1));
 			OnPropertyChanged("MeasureMessage");
 		}
@@ -150,7 +150,7 @@ namespace BezierSegmentDemo
 
 		public void UpdatePoints()
 		{
-			var bp = U.PolygonUtils.CubicBezierCurve(
+			var bp = U.PolygonUtils.CubicBezier(
 				figure.StartPoint, 
 				figure.StartBezierPoint,
 				figure.EndBezierPoint,
