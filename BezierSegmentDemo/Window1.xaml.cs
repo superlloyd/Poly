@@ -46,7 +46,8 @@ namespace BezierSegmentDemo
 
 		void UpdateMeasure()
 		{
-			MeasureMessage = string.Format("Distance to Curve: {0}", MeasurePoint.DistanceToBezier(figure.StartPoint, figure.StartBezierPoint, figure.EndBezierPoint, figure.EndPoint));
+			var bezier = PolygonUtils.CubicBezierCurve(figure.StartPoint, figure.StartBezierPoint, figure.EndBezierPoint, figure.EndPoint);
+			MeasureMessage = string.Format("Distance to Curve: {0}", bezier.DistanceTo(MeasurePoint.ToArray(), 0, 1));
 			OnPropertyChanged("MeasureMessage");
 		}
 		public string MeasureMessage { get; set; }
@@ -160,7 +161,7 @@ namespace BezierSegmentDemo
 			for (int i = 0; i <= NumPoints; i++)
 			{
 				var t = i * dt;
-				var p = new Point(bp.Item1.Compute(t), bp.Item2.Compute(t));
+				var p = PolygonUtils.PointFromArray(bp.Compute(t));
 				var it = new ThumbPoint { Point = p, Background = Brushes.CornflowerBlue };
 				overlay.Children.Add(it);
 			}
