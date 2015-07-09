@@ -1,4 +1,4 @@
-This projet demonstrate a Polynomial utility class
+This project demonstrate a Polynomial utility class
 
 Supported operation:
 	- + - * /
