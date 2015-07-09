@@ -7,6 +7,10 @@ Supported operation:
 	Compute, of course! for double and Complex
 	Bezier Equations
 
+2015 June 10
+	Added PolyCurve class for parameterized multidimensional curves
+	With DistanceTo(), ClosestPoint(), ClosestParameter() methods
+
 
 Finally in PolygonUtils there are the some measurement methods
 (illustrated in the WPF demo)
