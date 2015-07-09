@@ -274,7 +274,7 @@ namespace BRPWorld.Utils.Utils
 		public static Polynomial LinearBezierCurve(double p0, double p1)
 		{
 			var T = new Polynomial(0, 1);
-			return p0 + T * (p1 - p0);
+			return (1 - T) * p0 + T * p1;
 		}
 		public static Polynomial QuadraticBezierCurve(double p0, double p1, double p2)
 		{
