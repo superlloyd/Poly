@@ -7,7 +7,9 @@ using System.Threading.Tasks;
 
 namespace BRPWorld.Utils.Utils
 {
+// Don't worry about Equals() without GetHashCode()
 #pragma warning disable 659
+
 	public class Polynomial
 	{
 		double[] coefficients;
@@ -397,5 +399,6 @@ namespace BRPWorld.Utils.Utils
 
 		#endregion
 	}
-#pragma warning restore
+
+#pragma warning restore 659
 }
