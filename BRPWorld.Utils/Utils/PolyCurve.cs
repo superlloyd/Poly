@@ -175,7 +175,7 @@ namespace BRPWorld.Utils.Utils
 			var deriv = dsquare.Derivate().Normalize();
 			var derivRoots = deriv.FindRoots();
 			return derivRoots
-				.Where(x => Math.Abs(x.Imaginary) < Polynomial.Epsilon && x.Real > 0 && x.Real < 1)
+				.Where(x => Math.Abs(x.Imaginary) < Polynomial.Epsilon)
 				.Select(x => (double)x.Real)
 				.Where(x => x > pmin && x < pmax)
 				.Concat(new double[] { pmin, pmax })
