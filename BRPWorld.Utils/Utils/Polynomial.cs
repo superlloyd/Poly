@@ -275,9 +275,10 @@ namespace BRPWorld.Utils.Utils
 
 		public static Polynomial LinearBezierCurve(double p0, double p1)
 		{
-			var T = new Polynomial(0, 1);
-			return (1 - T) * p0 + T * p1;
-		}
+            //return Interpolate(p0, p1);// same thing but less readable
+            var T = new Polynomial(0, 1);
+            return (1 - T) * p0 + T * p1;
+        }
 		public static Polynomial QuadraticBezierCurve(double p0, double p1, double p2)
 		{
 			var T = new Polynomial(0, 1);
@@ -354,6 +355,33 @@ namespace BRPWorld.Utils.Utils
 		}
 
 		#endregion
+
+        #region Interpolate()
+
+        /// <summary>
+        /// Construct a polynomial P such as ys[i] = P.Compute(i).
+        /// </summary>
+        public static Polynomial Interpolate(params double[] ys)
+        {
+            if (ys == null || ys.Length < 2)
+                throw new ArgumentNullException("At least 2 different points must be given");
+
+            var res = new Polynomial();
+            for (int i = 0; i < ys.Length; i++)
+            {
+                var e = new Polynomial(1);
+                for (int j = 0; j < ys.Length; j++)
+                {
+                    if (j == i)
+                        continue;
+                    e *= new Polynomial(-j, 1) / (i - j);
+                }
+                res += ys[i] * e;
+            }
+            return res.Trim();
+        }
+
+        #endregion
 
 		#region overrides ToString() Equals()
 

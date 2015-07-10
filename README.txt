@@ -6,10 +6,14 @@ Supported operation:
 	FindRoots (Polynomial root solver, i.e. value for which the Polynomial compute to 0)
 	Compute, of course! for double and Complex
 	Bezier Equations
+	Interpolate()
 
 2015 June 10
 	Added PolyCurve class for parameterized multidimensional curves
-	With DistanceTo(), ClosestPoint(), ClosestParameter() methods
+	With 
+	- DistanceTo(), ClosestPoint(), ClosestParameter() methods
+	- Interpolate()
+	- Bezier()
 
 
 Finally in PolygonUtils there are the some measurement methods

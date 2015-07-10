@@ -133,66 +133,98 @@ namespace BRPWorld.Utils.Utils
 
 		#endregion
 
-		#region ParameterizedSquareDistance() ClosestParameter() DistanceTo()
+        #region ParameterizedSquareDistance() ClosestParameter() ClosestPoint() DistanceTo()
 
-		Polynomial ParameterizedSquareDistance(double[] point)
-		{
-			if (point.Length != coordinates.Length)
-				throw new ArgumentException("Point and PolyCurve have different Dimension.");
-			var res = new Polynomial();
-			for (int i = 0; i < coordinates.Length; i++)
-			{
-				var p = coordinates[i] - point[i];
-				p = p * p;
-				res += p;
-			}
-			return res;
-		}
+        public Polynomial ParameterizedSquareDistance(double[] point)
+        {
+            if (point.Length != coordinates.Length)
+                throw new ArgumentException("Point and PolyCurve have different Dimension.");
+            var res = new Polynomial();
+            for (int i = 0; i < coordinates.Length; i++)
+            {
+                var p = coordinates[i] - point[i];
+                p = p * p;
+                res += p;
+            }
+            return res;
+        }
 
-		public double ClosestParameter(double[] point, double pmin, double pmax)
-		{
-			var dsquare = ParameterizedSquareDistance(point);
-			var deriv = dsquare.Derivate().Normalize();
-			var derivRoots = deriv.FindRoots();
-			return derivRoots
-				.Where(x => Math.Abs(x.Imaginary) < Polynomial.Epsilon)
-				.Select(x => (double)x.Real)
-				.Where(x => x > pmin && x < pmax)
-				.Concat(new double[] { pmin, pmax })
-				.OrderBy(x => dsquare.Compute(x))
-				.First();
-		}
+        public double ClosestParameter(double[] point)
+        {
+            var dsquare = ParameterizedSquareDistance(point);
+            var deriv = dsquare.Derivate().Normalize();
+            var derivRoots = deriv.FindRoots();
+            return derivRoots
+                .Where(x => Math.Abs(x.Imaginary) < Polynomial.Epsilon)
+                .Select(x => (double)x.Real)
+                .OrderBy(x => dsquare.Compute(x))
+                .First();
+        }
 
-		public double[] ClosestPoint(double[] point, double pmin, double pmax)
-		{
-			var p = ClosestParameter(point, pmin, pmax);
-			return this.Compute(p);
-		}
+        public double ClosestParameter(double[] point, double pmin, double pmax)
+        {
+            var dsquare = ParameterizedSquareDistance(point);
+            var deriv = dsquare.Derivate().Normalize();
+            var derivRoots = deriv.FindRoots();
+            return derivRoots
+                .Where(x => Math.Abs(x.Imaginary) < Polynomial.Epsilon)
+                .Select(x => (double)x.Real)
+                .Where(x => x > pmin && x < pmax)
+                .Concat(new double[] { pmin, pmax })
+                .OrderBy(x => dsquare.Compute(x))
+                .First();
+        }
 
-		public double DistanceTo(double[] point, double pmin, double pmax)
-		{
-			var dsquare = ParameterizedSquareDistance(point);
-			var deriv = dsquare.Derivate().Normalize();
-			var derivRoots = deriv.FindRoots();
-			return derivRoots
-				.Where(x => Math.Abs(x.Imaginary) < Polynomial.Epsilon)
-				.Select(x => (double)x.Real)
-				.Where(x => x > pmin && x < pmax)
-				.Concat(new double[] { pmin, pmax })
-				.Select(x => Math.Sqrt(dsquare.Compute(x)))
-				.OrderBy(x => x)
-				.First();
-		}
+        public double[] ClosestPoint(double[] point)
+        {
+            var p = ClosestParameter(point);
+            return this.Compute(p);
+        }
 
-		#endregion
+        public double[] ClosestPoint(double[] point, double pmin, double pmax)
+        {
+            var p = ClosestParameter(point, pmin, pmax);
+            return this.Compute(p);
+        }
+
+        public double DistanceTo(double[] point)
+        {
+            var dsquare = ParameterizedSquareDistance(point);
+            var deriv = dsquare.Derivate().Normalize();
+            var derivRoots = deriv.FindRoots();
+            return derivRoots
+                .Where(x => Math.Abs(x.Imaginary) < Polynomial.Epsilon)
+                .Select(x => (double)x.Real)
+                .Select(x => Math.Sqrt(dsquare.Compute(x)))
+                .OrderBy(x => x)
+                .First();
+        }
+
+        public double DistanceTo(double[] point, double pmin, double pmax)
+        {
+            var dsquare = ParameterizedSquareDistance(point);
+            var deriv = dsquare.Derivate().Normalize();
+            var derivRoots = deriv.FindRoots();
+            return derivRoots
+                .Where(x => Math.Abs(x.Imaginary) < Polynomial.Epsilon)
+                .Select(x => (double)x.Real)
+                .Where(x => x > pmin && x < pmax)
+                .Concat(new double[] { pmin, pmax })
+                .Select(x => Math.Sqrt(dsquare.Compute(x)))
+                .OrderBy(x => x)
+                .First();
+        }
+
+        #endregion
 
 		#region interpolation: BezierCurves
 
 		public static PolyCurve Segment(double[] p0, double[] p1)
 		{
-			var T = new Polynomial(0, 1);
-			return (1 - T) * new PolyCurve(p0) + T * new PolyCurve(p1);
-		}
+            //return Interpolate(p0, p1);// same thing but less readable
+            var T = new Polynomial(0, 1);
+            return (1 - T) * new PolyCurve(p0) + T * new PolyCurve(p1);
+        }
 		public static PolyCurve QuadraticBezierCurve(double[] p0, double[] p1, double[] p2)
 		{
 			var T = new Polynomial(0, 1);
@@ -205,5 +237,29 @@ namespace BRPWorld.Utils.Utils
 		}
 
 		#endregion
-	}
+
+        #region Interpolate()
+
+        /// <summary>
+        /// Construct a PolyCurve P such as points[i] = P.Compute(i)
+        /// </summary>
+        public static PolyCurve Interpolate(params double[][] points)
+        {
+            if (points == null || points.Length < 2)
+                throw new ArgumentNullException("At least 2 different points must be given");
+
+            var ys = new double[points.Length];
+            var res = new Polynomial[points[0].Length];
+            for (int i = 0; i < res.Length; i++)
+            {
+                for (int j = 0; j < points.Length; j++)
+                    ys[j] = points[j][i];
+                res[i] = Polynomial.Interpolate(ys);
+            }
+
+            return new PolyCurve(res);
+        }
+
+        #endregion
+    }
 }
