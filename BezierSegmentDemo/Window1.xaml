@@ -6,13 +6,14 @@
     
     <Window.Resources>
         <Style TargetType="{x:Type BezierSegmentDemo:BezierFigure}">
+            <Setter Property="Foreground" Value="Red"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type BezierSegmentDemo:BezierFigure}">
                         <Canvas Background="AliceBlue">
                             
                             <!-- render the BezierSegment itself -->
-                            <Path Stroke="Red" StrokeThickness="2" >
+                            <Path Stroke="{TemplateBinding Foreground}" StrokeThickness="2" >
                                 <Path.Data>
                                     <PathGeometry>
                                         <PathGeometry.Figures>
@@ -131,9 +132,11 @@
                 <TextBlock Text="{Binding ElementName=figure, Path=EndBezierPoint, StringFormat=F0}"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal">
-					<TextBlock Text="Num of Points: "/>
-					<Slider Width="100" Minimum="4" Maximum="35" Value="{Binding NumPoints, Mode=TwoWay}"/>
-			</StackPanel>
+                <TextBlock Text="Num of Points: "/>
+                <Slider Width="100" Minimum="4" Maximum="35" Value="{Binding NumPoints, Mode=TwoWay}"/>
+                <TextBlock Text="Cut Bezier At: "/>
+                <Slider Width="100" Minimum="0" Maximum="1" Value="{Binding CutPoint, Mode=TwoWay}"/>
+            </StackPanel>
         </StackPanel>
         
         <StackPanel DockPanel.Dock="Top" Background="Gray" TextElement.Foreground="White">
@@ -157,9 +160,10 @@
 						<BezierSegmentDemo:ThumbPoint x:Name="distance" 
 													  Point="{Binding MeasurePoint, Mode=TwoWay}" 
 													  Background="Red"/>
-					</Canvas>
-				<Canvas x:Name="overlay" IsHitTestVisible="False"></Canvas>
-			</Grid>
+				</Canvas>
+                <Canvas x:Name="overlay2" IsHitTestVisible="False"></Canvas>
+                <Canvas x:Name="overlay" IsHitTestVisible="False"></Canvas>
+            </Grid>
         </Border>
 
     </DockPanel>

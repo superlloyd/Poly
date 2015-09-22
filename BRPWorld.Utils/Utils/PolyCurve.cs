@@ -217,11 +217,12 @@ namespace BRPWorld.Utils.Utils
 
         #endregion
 
-		#region interpolation: BezierCurves
+        #region interpolation: BezierCurves
 
-		public static PolyCurve Segment(double[] p0, double[] p1)
+        // good extensive tutorial on Bezier curves http://pomax.github.io/bezierinfo/
+
+        public static PolyCurve Segment(double[] p0, double[] p1)
 		{
-            //return Interpolate(p0, p1);// same thing but less readable
             var T = new Polynomial(0, 1);
             return (1 - T) * new PolyCurve(p0) + T * new PolyCurve(p1);
         }
@@ -230,11 +231,73 @@ namespace BRPWorld.Utils.Utils
 			var T = new Polynomial(0, 1);
 			return (1 - T) * Segment(p0, p1) + T * Segment(p1, p2);
 		}
-		public static PolyCurve CubicBezierCurve(double[] p0, double[] p1, double[] p2, double[] p3)
-		{
-			var T = new Polynomial(0, 1);
-			return (1 - T) * QuadraticBezierCurve(p0, p1, p2) + T * QuadraticBezierCurve(p1, p2, p3);
-		}
+        public static PolyCurve CubicBezierCurve(double[] p0, double[] p1, double[] p2, double[] p3)
+        {
+            var T = new Polynomial(0, 1);
+            return (1 - T) * QuadraticBezierCurve(p0, p1, p2) + T * QuadraticBezierCurve(p1, p2, p3);
+        }
+        public static PolyCurve Bezier(params double[][] cpts)
+        {
+            if (cpts == null || cpts.Length == 0)
+                throw new ArgumentNullException();
+            var T = new Polynomial(0, 1);
+            if (cpts.Length == 1)
+            {
+                return new PolyCurve(cpts[0]);
+            }
+            else if (cpts.Length == 2)
+            {
+                return (1 - T) * new PolyCurve(cpts[0]) + T * new PolyCurve(cpts[1]);
+            }
+            else
+            {
+                var sub0 = new double[cpts.Length - 1][];
+                var sub1 = new double[cpts.Length - 1][];
+                for (int i = 0; i < cpts.Length - 1; i++)
+                {
+                    sub0[i] = cpts[i];
+                    sub1[i] = cpts[i + 1];
+                }
+                return (1 - T) * Bezier(sub0) + T * Bezier(sub1);
+            }
+        }
+
+        // one algorithm to split bezier in detail (not really foloow it, just followed geometric explanation)
+        // https://en.wikipedia.org/wiki/De_Casteljau%27s_algorithm
+
+        /// <summary>
+        /// Returns a double[2][NPoint][dim] of control point for the 2 sub curves
+        /// </summary>
+        /// <param name="t">A number in [0,1] where the bezier curve was cut</param>
+        /// <param name="cpts">Control point of the bezier curve.</param>
+        /// <returns>2 set of control point for a same order bezier curve</returns>
+        public static double[][][] SplitBezier(double t, params double[][] cpts)
+        {
+            if (t < 0 || t > 1)
+                throw new ArgumentOutOfRangeException();
+            return new double[2][][] { PartialBezier(t, cpts), PartialBezier(1 - t, cpts.Reverse()) };
+        }
+        static double[][] PartialBezier(double t, IEnumerable<double[]> points)
+        {
+            var lp = points.ToList();
+            var result = new List<double[]>();
+            while (lp.Count > 0)
+            {
+                result.Add(lp[0]);
+                var next = new List<double[]>(lp.Count - 1);
+                for (int i = 0; i < lp.Count - 1; i++)
+                {
+                    var p0 = lp[i];
+                    var p1 = lp[i + 1];
+                    var p = new double[p0.Length];
+                    for (int j = 0; j < p.Length; j++)
+                        p[j] = p0[j] * (1 - t) + t * p1[j];
+                    next.Add(p);
+                }
+                lp = next;
+            }
+            return result.ToArray();
+        }
 
 		#endregion
 

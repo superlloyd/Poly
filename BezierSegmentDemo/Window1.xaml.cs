@@ -60,16 +60,33 @@ namespace BezierSegmentDemo
 		}
 		public event PropertyChangedEventHandler PropertyChanged;
 
-		public int NumPoints
-		{
-			get { return mNumPoints; }
-			set
-			{
-				mNumPoints = value;
-				UpdatePoints();
-			}
-		}
-		int mNumPoints = 10;
+        public int NumPoints
+        {
+            get { return mNumPoints; }
+            set
+            {
+                mNumPoints = value;
+                UpdatePoints();
+                OnPropertyChanged("NumPoints");
+            }
+        }
+        int mNumPoints = 10;
+
+        public double CutPoint
+        {
+            get { return mCutPoint; }
+            set
+            {
+                if (value < 0)
+                    value = 0;
+                if (value > 1)
+                    value = 1;
+                mCutPoint = value;
+                OnPropertyChanged("CutPoint");
+                UpdateCuts();
+            }
+        }
+        double mCutPoint = 0.5;
 
         public bool IsAnimated
         {
@@ -166,6 +183,35 @@ namespace BezierSegmentDemo
 				overlay.Children.Add(it);
 			}
 			UpdateMeasure();
-		}
+            UpdateCuts();
+        }
+        public void UpdateCuts()
+        {
+            var split = U.PolygonUtils.SplitBezier(CutPoint, 
+                figure.StartPoint,
+                figure.StartBezierPoint,
+                figure.EndBezierPoint,
+                figure.EndPoint);
+
+            var first = new BezierFigure
+            {
+                Foreground = Brushes.Red,
+                StartPoint = split[0][0],
+                StartBezierPoint = split[0][1],
+                EndBezierPoint = split[0][2],
+                EndPoint = split[0][3],
+            };
+            var last = new BezierFigure
+            {
+                Foreground = Brushes.Blue,
+                StartPoint = split[1][0],
+                StartBezierPoint = split[1][1],
+                EndBezierPoint = split[1][2],
+                EndPoint = split[1][3],
+            };
+            overlay2.Children.Clear();
+            overlay2.Children.Add(first);
+            overlay2.Children.Add(last);
+        }
     }
 }

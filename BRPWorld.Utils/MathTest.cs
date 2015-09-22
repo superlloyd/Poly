@@ -44,20 +44,30 @@ namespace Utils.Tests
 			Assert.AreEqual(new Polynomial(1, 0, 1), 1 + (X ^ 2));
 		}
 
-		[Test]
-		public void TestPolyBezier()
-		{
-			Action<Polynomial, double, double> check = (poly, p0, p1) =>
-			{
-				Assert.IsTrue(Math.Abs(poly.Compute(0) - p0) < 0.0001);
-				Assert.IsTrue(Math.Abs(poly.Compute(1) - p1) < 0.0001);
-			};
-			check(Polynomial.LinearBezierCurve(0, 1), 0, 1);
-			check(Polynomial.QuadraticBezierCurve(0, -1, 1), 0, 1);
-			check(Polynomial.CubicBezierCurve(0, 2, 0.5, 1), 0, 1);
-		}
+        [Test]
+        public void TestPolyBezier()
+        {
+            Action<Polynomial, double, double> check = (poly, p0, p1) =>
+            {
+                Assert.IsTrue(Math.Abs(poly.Compute(0) - p0) < 0.0001);
+                Assert.IsTrue(Math.Abs(poly.Compute(1) - p1) < 0.0001);
+            };
+            check(Polynomial.LinearBezierCurve(0, 1), 0, 1);
+            check(Polynomial.QuadraticBezierCurve(0, -1, 1), 0, 1);
+            check(Polynomial.CubicBezierCurve(0, 2, 0.5, 1), 0, 1);
+        }
 
-		[Test]
+        [Test]
+        public void TestGeneralBezier()
+        {
+            var q1 = Polynomial.CubicBezierCurve(1, 2, 4, 8);
+            var q2 = Polynomial.Bezier(1, 2, 4, 8);
+            Assert.AreEqual(q1.Order, q2.Order);
+            for (int i = 0; i < q1.Order; i++)
+                Assert.IsTrue(Math.Abs(q1[i] - q2[i]) < 0.0001);
+        }
+
+        [Test]
 		public void TestPolyFind()
 		{
 			TestPolyFind(new Polynomial(0.5, 1, -1, 0, 1));

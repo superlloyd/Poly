@@ -29,19 +29,34 @@ namespace BRPWorld.Utils.Utils
 			return PolyCurve.Segment(start.ToArray(), end.ToArray());
 		}
 
-		public static PolyCurve CubicBezier(Point start, Point cp1, Point cp2, Point end)
-		{
-			return PolyCurve.CubicBezierCurve(
-				start.ToArray(),
-				cp1.ToArray(),
-				cp2.ToArray(),
-				end.ToArray()
-			);
-		}
+        public static PolyCurve CubicBezier(Point start, Point cp1, Point cp2, Point end)
+        {
+            return PolyCurve.CubicBezierCurve(
+                start.ToArray(),
+                cp1.ToArray(),
+                cp2.ToArray(),
+                end.ToArray()
+            );
+        }
 
-		#region obsolete legacy for Github users
+        public static PolyCurve Bezier(params Point[] points)
+        {
+            return PolyCurve.Bezier(points.Select(x => x.ToArray()).ToArray());
+        }
 
-		[Obsolete]
+        public static Point[][] SplitBezier(double t, params Point[] points)
+        {
+            var split = PolyCurve.SplitBezier(t, points.Select(x => x.ToArray()).ToArray());
+            return new Point[2][] 
+            {
+                split[0].Select(x => PointFromArray(x)).ToArray(),
+                split[1].Select(x => PointFromArray(x)).ToArray(),
+            };
+        }
+
+        #region obsolete legacy for Github users
+
+        [Obsolete]
 		public static Point ClosestPointOnSegment(this Point p, Point start, Point end)
 		{
 			return ClosestPointOnCurve(p, SegmentCurve(start, end));

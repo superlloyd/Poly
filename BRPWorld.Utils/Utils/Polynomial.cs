@@ -289,16 +289,73 @@ namespace BRPWorld.Utils.Utils
 			var T = new Polynomial(0, 1);
 			return (1 - T) * QuadraticBezierCurve(p0, p1, p2) + T * QuadraticBezierCurve(p1, p2, p3);
 		}
+        public static Polynomial Bezier(params double[] cpts)
+        {
+            if (cpts == null || cpts.Length == 0)
+                throw new ArgumentNullException();
+            var T = new Polynomial(0, 1);
+            if (cpts.Length == 1)
+            {
+                return new Polynomial(cpts[0]);
+            }
+            else if (cpts.Length == 2)
+            {
+                return (1 - T) * new Polynomial(cpts[0]) + T * new Polynomial(cpts[1]);
+            }
+            else
+            {
+                var sub0 = new double[cpts.Length - 1];
+                var sub1 = new double[cpts.Length - 1];
+                for (int i = 0; i < cpts.Length - 1; i++)
+                {
+                    sub0[i] = cpts[i];
+                    sub1[i] = cpts[i + 1];
+                }
+                return (1 - T) * Bezier(sub0) + T * Bezier(sub1);
+            }
+        }
 
-		#endregion
+        /// <summary>
+        /// Returns a double[2][NPoint] of control point for the 2 sub curves
+        /// </summary>
+        /// <param name="t">A number in [0,1] where the bezier curve was cut</param>
+        /// <param name="cpts">Control point of the bezier curve.</param>
+        /// <returns>2 set of control point for a same order bezier curve</returns>
+        public static double[][] SplitBezier(double t, params double[] cpts)
+        {
+            if (t < 0 || t > 1)
+                throw new ArgumentOutOfRangeException();
+            return new double[2][] { PartialBezier(t, cpts), PartialBezier(1 - t, cpts.Reverse()) };
+        }
+        static double[] PartialBezier(double t, IEnumerable<double> points)
+        {
+            var lp = points.ToList();
+            var result = new List<double>();
+            while (lp.Count > 0)
+            {
+                result.Add(lp[0]);
+                var next = new List<double>(lp.Count - 1);
+                for (int i = 0; i < lp.Count - 1; i++)
+                {
+                    var p0 = lp[i];
+                    var p1 = lp[i + 1];
+                    var p = p0 * (1 - t) + t * p1;
+                    next.Add(p);
+                }
+                lp = next;
+            }
+            return result.ToArray();
+        }
 
-		#region FindRoots()
+        #endregion
 
-		/// <summary>
-		/// This method use the Durand-Kerner aka Weierstrass algorithm to find approximate root of this polynomial.
-		/// http://en.wikipedia.org/wiki/Durand%E2%80%93Kerner_method
-		/// </summary>
-		public Complex[] FindRoots()
+        #region FindRoots()
+
+        /// <summary>
+        /// This method use the Durand-Kerner aka Weierstrass algorithm to find approximate root of this polynomial.
+        /// http://en.wikipedia.org/wiki/Durand%E2%80%93Kerner_method
+        /// </summary>
+        public Complex[] FindRoots()
 		{
 			var p = this.Normalize();
 			if (p.coefficients.Length == 1) return new Complex[0];
