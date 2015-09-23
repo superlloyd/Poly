@@ -325,15 +325,13 @@ namespace BRPWorld.Utils.Utils
         {
             if (t < 0 || t > 1)
                 throw new ArgumentOutOfRangeException();
-            return new double[2][] { PartialBezier(t, cpts), PartialBezier(1 - t, cpts.Reverse()) };
-        }
-        static double[] PartialBezier(double t, IEnumerable<double> points)
-        {
-            var lp = points.ToList();
-            var result = new List<double>();
+            var lp = cpts.ToList();
+            var result0 = new List<double>();
+            var result1 = new List<double>();
             while (lp.Count > 0)
             {
-                result.Add(lp[0]);
+                result0.Add(lp.First());
+                result1.Add(lp.Last());
                 var next = new List<double>(lp.Count - 1);
                 for (int i = 0; i < lp.Count - 1; i++)
                 {
@@ -344,7 +342,7 @@ namespace BRPWorld.Utils.Utils
                 }
                 lp = next;
             }
-            return result.ToArray();
+            return new[] { result0.ToArray(), result1.ToArray() };
         }
 
         #endregion
