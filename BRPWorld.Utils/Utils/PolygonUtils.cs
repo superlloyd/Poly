@@ -24,36 +24,6 @@ namespace BRPWorld.Utils.Utils
 		}
 		public static double[] ToArray(this Point p) { return new[] { p.X, p.Y }; }
 
-		public static PolyCurve Segment(Point start, Point end)
-		{
-			return PolyCurve.Segment(start.ToArray(), end.ToArray());
-		}
-
-        public static PolyCurve CubicBezier(Point start, Point cp1, Point cp2, Point end)
-        {
-            return PolyCurve.CubicBezierCurve(
-                start.ToArray(),
-                cp1.ToArray(),
-                cp2.ToArray(),
-                end.ToArray()
-            );
-        }
-
-        public static PolyCurve Bezier(params Point[] points)
-        {
-            return PolyCurve.Bezier(points.Select(x => x.ToArray()).ToArray());
-        }
-
-        public static Point[][] SplitBezier(double t, params Point[] points)
-        {
-            var split = PolyCurve.SplitBezier(t, points.Select(x => x.ToArray()).ToArray());
-            return new Point[2][] 
-            {
-                split[0].Select(x => PointFromArray(x)).ToArray(),
-                split[1].Select(x => PointFromArray(x)).ToArray(),
-            };
-        }
-
         #region obsolete legacy for Github users
 
         [Obsolete]
@@ -98,14 +68,14 @@ namespace BRPWorld.Utils.Utils
 		[Obsolete]
 		public static Tuple<Polynomial, Polynomial> SegmentCurve(Point start, Point end)
 		{
-			var curve = Segment(start, end);
+			var curve = Bezier.Line(start, end);
 			return Tuple.Create(curve[0], curve[1]);
 		}
 
 		[Obsolete]
 		public static Tuple<Polynomial, Polynomial> CubicBezierCurve(Point start, Point cp1, Point cp2, Point end)
 		{
-			var curve = CubicBezier(start, cp1, cp2, end);
+			var curve = Bezier.Cubic(start, cp1, cp2, end);
 			return Tuple.Create(curve[0], curve[1]);
 		}
 
