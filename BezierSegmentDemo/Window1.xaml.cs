@@ -88,6 +88,17 @@ namespace BezierSegmentDemo
         }
         double mCutPoint = 0.5;
 
+        public Rect BezierBounds
+        {
+            get { return mBezierBounds; }
+            private set
+            {
+                mBezierBounds = value;
+                OnPropertyChanged("BezierBounds");
+            }
+        }
+        Rect mBezierBounds;
+
         public bool IsAnimated
         {
             get
@@ -173,6 +184,12 @@ namespace BezierSegmentDemo
 				figure.EndBezierPoint,
 				figure.EndPoint
 			);
+            BezierBounds = Bezier.BoundingBox(
+                figure.StartPoint,
+                figure.StartBezierPoint,
+                figure.EndBezierPoint,
+                figure.EndPoint
+            );
 			overlay.Children.Clear();
 			var dt = 1.0 / NumPoints;
 			for (int i = 0; i <= NumPoints; i++)

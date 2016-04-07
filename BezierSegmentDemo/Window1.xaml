@@ -146,20 +146,27 @@
         <Border DockPanel.Dock="Top" BorderBrush="Black" BorderThickness="1">
 			<Grid>
 				<Canvas ClipToBounds="True">
-					<BezierSegmentDemo:BezierFigure x:Name="figure"
-						StartPoint="40,80"
-						StartBezierPoint="100,300"
-						EndBezierPoint="400,80"
-						EndPoint="450,300"/>
-						<TextBlock Background="Yellow" 
-								   IsHitTestVisible="False"
-								   Text="{Binding MeasureMessage}" 
-								   Canvas.Top="{Binding Point.Y, ElementName=distance}"
-								   Canvas.Left="{Binding Point.X, ElementName=distance}"
-								   />
-						<BezierSegmentDemo:ThumbPoint x:Name="distance" 
-													  Point="{Binding MeasurePoint, Mode=TwoWay}" 
-													  Background="Red"/>
+                        <Rectangle Stroke="Green" 
+                                   StrokeThickness="2"
+                                   Canvas.Top="{Binding BezierBounds.Y}" 
+                                   Canvas.Left="{Binding BezierBounds.X}"
+                                   Width="{Binding BezierBounds.Width}" 
+                                   Height="{Binding BezierBounds.Height}"
+                               />
+                        <BezierSegmentDemo:BezierFigure x:Name="figure"
+						    StartPoint="40,80"
+						    StartBezierPoint="100,300"
+						    EndBezierPoint="400,80"
+						    EndPoint="450,300"/>
+					    <TextBlock Background="Yellow" 
+							IsHitTestVisible="False"
+							Text="{Binding MeasureMessage}" 
+							Canvas.Top="{Binding Point.Y, ElementName=distance}"
+							Canvas.Left="{Binding Point.X, ElementName=distance}"
+							/>
+					    <BezierSegmentDemo:ThumbPoint x:Name="distance" 
+							Point="{Binding MeasurePoint, Mode=TwoWay}" 
+							Background="Red"/>
 				</Canvas>
                 <Canvas x:Name="overlay2" IsHitTestVisible="False"></Canvas>
                 <Canvas x:Name="overlay" IsHitTestVisible="False"></Canvas>

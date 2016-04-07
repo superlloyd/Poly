@@ -57,6 +57,39 @@ namespace BRPWorld.Utils.Utils
                 end.ToArray()
             );
         }
+
+
+        public static Rect BoundingBox(Point start, Point cp1, Point cp2, Point end)
+        {
+            var curve = Cubic(start, cp1, cp2, end);
+            double x0, x1, y0, y1;
+            GetMinMax(Bezier01.Concat(curve[0].Derivate().SolveRealRoots().Where(t => t >= 0 && t <= 1)).Select(t => curve[0].Compute(t)), out x0, out x1);
+            GetMinMax(Bezier01.Concat(curve[1].Derivate().SolveRealRoots().Where(t => t >= 0 && t <= 1)).Select(t => curve[1].Compute(t)), out y0, out y1);
+            return new Rect(x0, y0, x1 - x0, y1 - y0);
+        }
+        static double[] Bezier01 = new double[] { 0, 1 };
+        static bool GetMinMax(IEnumerable<double> numbers, out double min, out double max)
+        {
+            min = max = 0;
+            bool first = true;
+            foreach (var x in numbers)
+            {
+                if (first)
+                {
+                    first = false;
+                    min = max = x;
+                }
+                else
+                {
+                    if (x < min)
+                        min = x;
+                    else if (x > max)
+                        max = x;
+                }
+            }
+            return !first;
+        }
+
         public static PolyCurve Cubic(double[] p0, double[] p1, double[] p2, double[] p3)
         {
             var T = new Polynomial(0, 1);

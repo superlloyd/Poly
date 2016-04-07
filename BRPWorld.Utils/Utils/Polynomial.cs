@@ -2,274 +2,296 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace BRPWorld.Utils.Utils
 {
-// Don't worry about Equals() without GetHashCode()
+    // Don't worry about Equals() without GetHashCode()
 #pragma warning disable 659
 
-	public class Polynomial
-	{
-		double[] coefficients;
+    public class Polynomial
+    {
+        double[] coefficients;
 
-		public Polynomial(params double[] coefficients)
-		{
-			this.coefficients = coefficients;
-			if (coefficients == null || coefficients.Length == 0)
-				this.coefficients = new double[] { 0 };
-		}
+        /// <summary>
+        /// Empty constructor to enable activation
+        /// </summary>
+        public Polynomial()
+        {
+            this.coefficients = new double[1];
+        }
 
-		public static Polynomial Term(int power, double coefficient = 1)
-		{
-			if (power < 0)
-				throw new ArgumentOutOfRangeException();
-			var res = new double[power + 1];
-			res[power] = coefficient;
-			return new Polynomial(res);
-		}
-		public static Polynomial X() { return new Polynomial(0, 1); }
+        public Polynomial(params double[] coefficients)
+        {
+            this.coefficients = coefficients;
+            if (coefficients == null || coefficients.Length == 0)
+                this.coefficients = new double[1];
+        }
 
-		#region Order, this[]
+        public static Polynomial Term(int power, double coefficient = 1)
+        {
+            if (power < 0)
+                throw new ArgumentOutOfRangeException();
+            var res = new double[power + 1];
+            res[power] = coefficient;
+            return new Polynomial(res);
+        }
+        public static Polynomial X() { return new Polynomial(0, 1); }
 
-		public int Order { get { return this.coefficients.Length - 1; } }
+        #region Order, this[]
 
-		public double this[int index]
-		{
-			get
-			{
-				if (index < 0 || index >= this.coefficients.Length)
-					throw new ArgumentOutOfRangeException();
-				return coefficients[index];
-			}
-			set
-			{
-				if (index < 0 || index > coefficients.Length)
-					throw new ArgumentOutOfRangeException();
-				coefficients[index] = value;
-			}
-		}
+        public int Order { get { return this.coefficients.Length - 1; } }
 
-		#endregion
+        public double this[int index]
+        {
+            get
+            {
+                if (index < 0)
+                    throw new ArgumentOutOfRangeException();
+                if (index >= this.coefficients.Length)
+                    return 0;
+                return coefficients[index];
+            }
+            set
+            {
+                if (index < 0 || index > coefficients.Length)
+                    throw new ArgumentOutOfRangeException();
+                coefficients[index] = value;
+            }
+        }
 
-		#region Normalize(), Trim(), Epsilon
+        #endregion
 
-		public Polynomial Normalize()
-		{
-			int order = 0;
-			double high = 1;
-			for (int i = 0; i < coefficients.Length; i++)
-			{
-				if (Math.Abs(coefficients[i]) > Epsilon)
-				{
-					order = i;
-					high = coefficients[i];
-				}
-			}
-			var res = new double[order + 1];
-			for (int i = 0; i < res.Length; i++)
-			{
-				if (Math.Abs(coefficients[i]) > Epsilon)
-				{
-					res[i] = coefficients[i] / high;
-				}
-			}
-			return new Polynomial(res);
-		}
+        #region Normalize() Trim() RealOrder() Epsilon
 
-		public Polynomial Trim() { return Trim(Epsilon); }
-		public Polynomial Trim(double epsilon)
-		{
-			int order = 0;
-			for (int i = 0; i < coefficients.Length; i++)
-			{
-				if (Math.Abs(coefficients[i]) > Epsilon)
-				{
-					order = i;
-				}
-			}
-			var res = new double[order + 1];
-			for (int i = 0; i < res.Length; i++)
-			{
-				if (Math.Abs(coefficients[i]) > Epsilon)
-				{
-					res[i] = coefficients[i];
-				}
-			}
-			return new Polynomial(res);
-		}
+        public Polynomial Normalize()
+        {
+            int order = 0;
+            double high = 1;
+            for (int i = 0; i < coefficients.Length; i++)
+            {
+                if (Math.Abs(coefficients[i]) > Epsilon)
+                {
+                    order = i;
+                    high = coefficients[i];
+                }
+            }
+            var res = new double[order + 1];
+            for (int i = 0; i < res.Length; i++)
+            {
+                if (Math.Abs(coefficients[i]) > Epsilon)
+                {
+                    res[i] = coefficients[i] / high;
+                }
+            }
+            return new Polynomial(res);
+        }
 
-		public static double Epsilon
-		{
-			get { return sEpsilon; }
-			set
-			{
-				if (value < double.Epsilon)
-					throw new ArgumentOutOfRangeException();
-				sEpsilon = value;
-			}
-		}
-		[ThreadStatic]
-		static double sEpsilon = 0.001;
+        public Polynomial Trim() { return Trim(Epsilon); }
+        public Polynomial Trim(double epsilon)
+        {
+            int order = 0;
+            for (int i = 0; i < coefficients.Length; i++)
+            {
+                if (Math.Abs(coefficients[i]) > Epsilon)
+                {
+                    order = i;
+                }
+            }
+            var res = new double[order + 1];
+            for (int i = 0; i < res.Length; i++)
+            {
+                if (Math.Abs(coefficients[i]) > Epsilon)
+                {
+                    res[i] = coefficients[i];
+                }
+            }
+            return new Polynomial(res);
+        }
 
-		#endregion
+        public int RealOrder() { return RealOrder(coefficients); }
+        public static int RealOrder(params double[] coefficients)
+        {
+            if (coefficients == null)
+                return 0;
+            int order = 0;
+            for (int i = 0; i < coefficients.Length; i++)
+            {
+                if (Math.Abs(coefficients[i]) > Epsilon)
+                {
+                    order = i;
+                }
+            }
+            return order;
+        }
 
-		#region math: * + ^
+        public static double Epsilon
+        {
+            get { return sEpsilon; }
+            set { sEpsilon = Math.Abs(value); }
+        }
+        [ThreadStatic]
+        static double sEpsilon = 0.00001;
 
-		/// <summary>
-		/// Raise a polynomial to power. Warning operator priority is wrong.
-		/// </summary>
-		public static Polynomial operator ^(Polynomial p, int pow) { return p.Pow(pow); }
+        #endregion
 
-		public static Polynomial operator *(Polynomial p, double m) { return m * p; }
-		public static Polynomial operator *(double m, Polynomial p)
-		{
-			var res = new double[p.coefficients.Length];
-			for (int i = 0; i < res.Length; i++)
-				res[i] = m * p.coefficients[i];
-			return new Polynomial(res);
-		}
-		public static Polynomial operator /(Polynomial p, double m)
-		{
-			var res = new double[p.coefficients.Length];
-			for (int i = 0; i < res.Length; i++)
-				res[i] = p.coefficients[i] / m;
-			return new Polynomial(res);
-		}
-		public static Polynomial operator *(Polynomial a, Polynomial b)
-		{
-			var res = new double[a.coefficients.Length + b.coefficients.Length - 1];
-			for (var i = 0; i < a.coefficients.Length; i++)
-				for (var j = 0; j < b.coefficients.Length; j++)
-				{
-					var mul = a.coefficients[i] * b.coefficients[j];
-					res[i + j] += mul;
-				}
-			return new Polynomial(res);
-		}
-		public static Polynomial operator +(Polynomial a, Polynomial b)
-		{
-			var res = new double[Math.Max(a.coefficients.Length, b.coefficients.Length)];
-			for (int i = 0; i < res.Length; i++)
-			{
-				double p = 0;
-				if (i < a.coefficients.Length) p += a.coefficients[i];
-				if (i < b.coefficients.Length) p += b.coefficients[i];
-				res[i] = p;
-			}
-			return new Polynomial(res);
-		}
-		public static Polynomial operator -(Polynomial a, Polynomial b)
-		{
-			var res = new double[Math.Max(a.coefficients.Length, b.coefficients.Length)];
-			for (int i = 0; i < res.Length; i++)
-			{
-				double p = 0;
-				if (i < a.coefficients.Length) p += a.coefficients[i];
-				if (i < b.coefficients.Length) p -= b.coefficients[i];
-				res[i] = p;
-			}
-			return new Polynomial(res);
-		}
-		public static Polynomial operator -(Polynomial a)
-		{
-			var res = new double[a.coefficients.Length];
-			for (int i = 0; i < res.Length; i++)
-				res[i] = -a.coefficients[i];
-			return new Polynomial(res);
-		}
-		public static Polynomial operator +(Polynomial a) { return a; }
+        #region math: * + ^
 
-		public static Polynomial operator +(Polynomial b, double a) { return a + b; }
-		public static Polynomial operator +(double a, Polynomial b)
-		{
-			var res = new double[b.coefficients.Length];
-			for (int i = 0; i < res.Length; i++) res[i] = b.coefficients[i];
-			res[0] += a;
-			return new Polynomial(res);
-		}
-		public static Polynomial operator -(Polynomial a, double b) { return a + (-b); }
-		public static Polynomial operator -(double b, Polynomial a)
-		{
-			var res = new double[a.coefficients.Length];
-			for (int i = 0; i < res.Length; i++) res[i] = -a.coefficients[i];
-			res[0] += b;
-			return new Polynomial(res);
-		}
+        /// <summary>
+        /// Raise a polynomial to power. Warning operator priority is wrong.
+        /// </summary>
+        public static Polynomial operator ^(Polynomial p, int pow) { return p.Pow(pow); }
 
-		#endregion
+        public static Polynomial operator *(Polynomial p, double m) { return m * p; }
+        public static Polynomial operator *(double m, Polynomial p)
+        {
+            var res = new double[p.coefficients.Length];
+            for (int i = 0; i < res.Length; i++)
+                res[i] = m * p.coefficients[i];
+            return new Polynomial(res);
+        }
+        public static Polynomial operator /(Polynomial p, double m)
+        {
+            var res = new double[p.coefficients.Length];
+            for (int i = 0; i < res.Length; i++)
+                res[i] = p.coefficients[i] / m;
+            return new Polynomial(res);
+        }
+        public static Polynomial operator *(Polynomial a, Polynomial b)
+        {
+            var res = new double[a.coefficients.Length + b.coefficients.Length - 1];
+            for (var i = 0; i < a.coefficients.Length; i++)
+                for (var j = 0; j < b.coefficients.Length; j++)
+                {
+                    var mul = a.coefficients[i] * b.coefficients[j];
+                    res[i + j] += mul;
+                }
+            return new Polynomial(res);
+        }
+        public static Polynomial operator +(Polynomial a, Polynomial b)
+        {
+            var res = new double[Math.Max(a.coefficients.Length, b.coefficients.Length)];
+            for (int i = 0; i < res.Length; i++)
+            {
+                double p = 0;
+                if (i < a.coefficients.Length) p += a.coefficients[i];
+                if (i < b.coefficients.Length) p += b.coefficients[i];
+                res[i] = p;
+            }
+            return new Polynomial(res);
+        }
+        public static Polynomial operator -(Polynomial a, Polynomial b)
+        {
+            var res = new double[Math.Max(a.coefficients.Length, b.coefficients.Length)];
+            for (int i = 0; i < res.Length; i++)
+            {
+                double p = 0;
+                if (i < a.coefficients.Length) p += a.coefficients[i];
+                if (i < b.coefficients.Length) p -= b.coefficients[i];
+                res[i] = p;
+            }
+            return new Polynomial(res);
+        }
+        public static Polynomial operator -(Polynomial a)
+        {
+            var res = new double[a.coefficients.Length];
+            for (int i = 0; i < res.Length; i++)
+                res[i] = -a.coefficients[i];
+            return new Polynomial(res);
+        }
+        public static Polynomial operator +(Polynomial a) { return a; }
 
-		#region operations: Compute() Pow() Derivate() Integrate()
+        public static Polynomial operator +(Polynomial b, double a) { return a + b; }
+        public static Polynomial operator +(double a, Polynomial b)
+        {
+            var res = new double[b.coefficients.Length];
+            for (int i = 0; i < res.Length; i++) res[i] = b.coefficients[i];
+            res[0] += a;
+            return new Polynomial(res);
+        }
+        public static Polynomial operator -(Polynomial a, double b) { return a + (-b); }
+        public static Polynomial operator -(double b, Polynomial a)
+        {
+            var res = new double[a.coefficients.Length];
+            for (int i = 0; i < res.Length; i++) res[i] = -a.coefficients[i];
+            res[0] += b;
+            return new Polynomial(res);
+        }
 
-		public double Compute(double x)
-		{
-			double res = 0;
-			double xcoef = 1;
-			for (int i = 0; i < coefficients.Length; i++)
-			{
-				res += coefficients[i] * xcoef;
-				xcoef *= x;
-			}
-			return res;
-		}
+        #endregion
 
-		public Complex Compute(Complex x)
-		{
-			Complex res = 0;
-			Complex xcoef = 1;
-			for (int i = 0; i < coefficients.Length; i++)
-			{
-				res += coefficients[i] * xcoef;
-				xcoef *= x;
-			}
-			return res;
-		}
+        #region operations: Compute() Pow() Derivate() Integrate()
 
-		public Polynomial Pow(int n)
-		{
-			if (n < 0)
-				throw new ArgumentOutOfRangeException();
-			var order = coefficients.Length - 1;
-			var res = new double[order * n + 1];
-			var tmp = new double[order * n + 1];
-			res[0] = 1;
-			for (int pow = 0; pow < n; pow++)
-			{
-				int porder = pow * order;
-				for (var i = 0; i <= order; i++)
-					for (var j = 0; j <= porder; j++)
-					{
-						var mul = coefficients[i] * res[j];
-						tmp[i + j] += mul;
-					}
-				for (int i = 0; i <= porder + order; i++)
-				{
-					res[i] = tmp[i];
-					tmp[i] = 0;
-				}
-			}
-			return new Polynomial(res);
-		}
+        public double Compute(double x)
+        {
+            double res = 0;
+            double xcoef = 1;
+            for (int i = 0; i < coefficients.Length; i++)
+            {
+                res += coefficients[i] * xcoef;
+                xcoef *= x;
+            }
+            return res;
+        }
 
-		public Polynomial Derivate()
-		{
-			var res = new double[Math.Max(1, coefficients.Length - 1)];
-			for (int i = 1; i < coefficients.Length; i++)
-				res[i - 1] = i * coefficients[i];
-			return new Polynomial(res);
-		}
+        public Complex Compute(Complex x)
+        {
+            Complex res = 0;
+            Complex xcoef = 1;
+            for (int i = 0; i < coefficients.Length; i++)
+            {
+                res += coefficients[i] * xcoef;
+                xcoef *= x;
+            }
+            return res;
+        }
 
-		public Polynomial Integrate(double term0 = 0)
-		{
-			var res = new double[coefficients.Length + 1];
-			res[0] = term0;
-			for (int i = 0; i < coefficients.Length; i++)
-				res[i + 1] = coefficients[i] / (i + 1);
-			return new Polynomial(res);
-		}
+        public Polynomial Pow(int n)
+        {
+            if (n < 0)
+                throw new ArgumentOutOfRangeException();
+            var order = coefficients.Length - 1;
+            var res = new double[order * n + 1];
+            var tmp = new double[order * n + 1];
+            res[0] = 1;
+            for (int pow = 0; pow < n; pow++)
+            {
+                int porder = pow * order;
+                for (var i = 0; i <= order; i++)
+                    for (var j = 0; j <= porder; j++)
+                    {
+                        var mul = coefficients[i] * res[j];
+                        tmp[i + j] += mul;
+                    }
+                for (int i = 0; i <= porder + order; i++)
+                {
+                    res[i] = tmp[i];
+                    tmp[i] = 0;
+                }
+            }
+            return new Polynomial(res);
+        }
 
-		#endregion
+        public Polynomial Derivate()
+        {
+            var res = new double[Math.Max(1, coefficients.Length - 1)];
+            for (int i = 1; i < coefficients.Length; i++)
+                res[i - 1] = i * coefficients[i];
+            return new Polynomial(res);
+        }
+
+        public Polynomial Integrate(double term0 = 0)
+        {
+            var res = new double[coefficients.Length + 1];
+            res[0] = term0;
+            for (int i = 0; i < coefficients.Length; i++)
+                res[i + 1] = coefficients[i] / (i + 1);
+            return new Polynomial(res);
+        }
+
+        #endregion
 
         #region FindRoots()
 
@@ -278,62 +300,180 @@ namespace BRPWorld.Utils.Utils
         /// http://en.wikipedia.org/wiki/Durand%E2%80%93Kerner_method
         /// </summary>
         public Complex[] FindRoots()
-		{
-			var p = this.Normalize();
-			if (p.coefficients.Length == 1) return new Complex[0];
+        {
+            var p = this.Normalize();
+            if (p.coefficients.Length == 1) return new Complex[0];
 
-			Complex x0 = 1;
-			Complex xMul = 0.4 + 0.9 * Complex.ImaginaryOne;
-			var R0 = new Complex[p.coefficients.Length - 1];
-			for (int i = 0; i < R0.Length; i++)
-			{
-				R0[i] = x0;
-				x0 *= xMul;
-			}
+            Complex x0 = 1;
+            Complex xMul = 0.4 + 0.9 * Complex.ImaginaryOne;
+            var R0 = new Complex[p.coefficients.Length - 1];
+            for (int i = 0; i < R0.Length; i++)
+            {
+                R0[i] = x0;
+                x0 *= xMul;
+            }
 
-			var R1 = new Complex[p.coefficients.Length - 1];
-			Func<int, Complex> divider = i =>
-			{
-				Complex div = 1;
-				for (int j = 0; j < R0.Length; j++)
-				{
-					if (j == i) continue;
-					div *= R0[i] - R0[j];
-				}
-				return div;
-			};
-			Action step = () =>
-			{
-				for (int i = 0; i < R0.Length; i++)
-				{
-					R1[i] = R0[i] - p.Compute(R0[i]) / divider(i);
-				}
-			};
-			Func<bool> closeEnough = () =>
-			{
-				for (int i = 0; i < R0.Length; i++)
-				{
-					var c = R0[i] - R1[i];
-					if (Math.Abs(c.Real) > Epsilon || Math.Abs(c.Imaginary) > Epsilon) return false;
-				}
-				return true;
-			};
-			bool close = false;
-			do
-			{
-				step();
-				close = closeEnough();
+            var R1 = new Complex[p.coefficients.Length - 1];
+            Func<int, Complex> divider = i =>
+            {
+                Complex div = 1;
+                for (int j = 0; j < R0.Length; j++)
+                {
+                    if (j == i) continue;
+                    div *= R0[i] - R0[j];
+                }
+                return div;
+            };
+            Action step = () =>
+            {
+                for (int i = 0; i < R0.Length; i++)
+                {
+                    R1[i] = R0[i] - p.Compute(R0[i]) / divider(i);
+                }
+            };
+            Func<bool> closeEnough = () =>
+            {
+                for (int i = 0; i < R0.Length; i++)
+                {
+                    var c = R0[i] - R1[i];
+                    if (Math.Abs(c.Real) > Epsilon || Math.Abs(c.Imaginary) > Epsilon) return false;
+                }
+                return true;
+            };
+            bool close = false;
+            do
+            {
+                step();
+                close = closeEnough();
 
-				var tmp = R0;
-				R0 = R1;
-				R1 = tmp;
-			}
-			while (!close);
+                var tmp = R0;
+                R0 = R1;
+                R1 = tmp;
+            }
+            while (!close);
 
-			return R0;
-		}
+            return R0;
+        }
 
-		#endregion
+        #endregion
+
+        #region SolveRealRoots()
+
+        /// <summary>
+        /// This will solve analytically polynomial up to 4th order
+        /// </summary>
+        public IEnumerable<double> SolveRealRoots()
+        {
+            return SolveRealRoots(coefficients);
+        }
+        /// <summary>
+        /// This will solve analytically polynomial up to 4th order
+        /// </summary>
+        public static IEnumerable<double> SolveRealRoots(params double[] poly)
+        {
+            switch (RealOrder(poly))
+            {
+                case 0:
+                    break;
+                case 1:
+                    yield return -poly[0] / poly[1];
+                    break;
+                case 2:
+                    {
+                        var delta = poly[1] * poly[1] - 4 * poly[2] * poly[0];
+                        if (delta < 0)
+                            yield break;
+                        var sd = Math.Sqrt(delta);
+                        yield return (-poly[1] - sd) / 2 / poly[2];
+                        if (sd > Epsilon)
+                            yield return (-poly[1] + sd) / 2 / poly[2];
+                    }
+                    break;
+                case 3:
+                    {
+                        // http://www.trans4mind.com/personal_development/mathematics/polynomials/cubicAlgebra.htm
+                        // http://pomax.github.io/bezierinfo/#extremities
+                        // x^3 + a x^2 + b x + c = 0
+                        var a = poly[2] / poly[3];
+                        var b = poly[1] / poly[3];
+                        var c = poly[0] / poly[3];
+                        // x = t - a/3
+                        // t3 + p t + q = 0
+                        var p = -a * a / 3 + b;
+                        var q = (2 * a * a * a - 9 * a * b + 27 * c) / 27;
+                        if (Math.Abs(p) < Epsilon)
+                        {
+                            // t^3 + q = 0  => t = -q^1/3 => x = -q^1/3 - a/3
+                            yield return -Crt(p) - a / 3;
+                        }
+                        else if (Math.Abs(q) < Epsilon)
+                        {
+                            // t^3 + pt = 0  => t (t^2 + p) = 0
+                            // t = 0, t = +/- (-p)^1/2
+                            yield return -a / 3;
+                            if (p < 0)
+                            {
+                                var root = Crt(p);
+                                yield return root - a / 3;
+                                yield return -root - a / 3;
+                            }
+                        }
+                        else
+                        {
+                            var disc = q * q / 4 + p * p * p / 27;
+                            if (disc < -Epsilon)
+                            {
+                                // 3 roots
+                                var r = Math.Sqrt(-p * p * p / 27);
+                                var phi = Math.Acos(MinMax(-q / 2 / r, -1, 1));
+                                var t1 = 2 * Crt(r);
+                                yield return t1 * Math.Cos(phi / 3) - a / 3;
+                                yield return t1 * Math.Cos((phi + 2 * Math.PI) / 3) - a / 3;
+                                yield return t1 * Math.Cos((phi + 4 * Math.PI) / 3) - a / 3;
+                            }
+                            else if (disc < Epsilon)
+                            {
+                                // 2 real roots
+                                var cq = Crt(q / 2);
+                                yield return -2 * cq - a / 3;
+                                yield return cq - a / 3;
+                            }
+                            else
+                            {
+                                // 1 real root
+                                var sd = Math.Sqrt(disc);
+                                yield return Crt(-q / 2 + sd) - Crt(q / 2 + sd) - a / 3;
+                            }
+                        }
+                    }
+                    break;
+                case 4:
+                    {
+                        // https://en.wikipedia.org/wiki/Quartic_function
+                        throw new NotImplementedException("yet");
+                    }
+                default:
+                    throw new NotSupportedException();
+            }
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static double Crt(double x)
+        {
+            if (x < 0)
+                return -Math.Pow(-x, 1.0 / 3.0);
+            return Math.Pow(x, 1.0 / 3.0);
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static double MinMax(double x, double min, double max)
+        {
+            if (x < min)
+                return min;
+            if (x > max)
+                return max;
+            return x;
+        }
+
+        #endregion
 
         #region Interpolate()
 
@@ -362,50 +502,49 @@ namespace BRPWorld.Utils.Utils
 
         #endregion
 
-		#region overrides ToString() Equals()
+        #region overrides ToString() Equals()
 
-		public override string ToString()
-		{
-			var sb = new StringBuilder();
-			for (int i = 0; i < coefficients.Length; i++)
-			{
-				var val = coefficients[i];
-				if (Math.Abs(val) < Epsilon)
-					continue;
-				if (val > 0 && sb.Length > 0)
-					sb.Append('+');
-				if (i > 0 && (Math.Abs(val) - 1) < Epsilon)
-				{
-					if (val < 0)
-						sb.Append('-');
-				}
-				else
-				{
-					sb.Append(val);
-				}
-				if (i > 0)
-					sb.Append('x');
-				if (i > 1)
-					sb.Append('^').Append(i);
-			}
-			if (sb.Length == 0)
-				sb.Append('0');
-			return sb.ToString();
-		}
+        public override string ToString()
+        {
+            var sb = new StringBuilder();
+            for (int i = 0; i < coefficients.Length; i++)
+            {
+                var val = coefficients[i];
+                if (Math.Abs(val) < Epsilon)
+                    continue;
+                if (val > 0 && sb.Length > 0)
+                    sb.Append('+');
+                if (i > 0 && (Math.Abs(val) - 1) < Epsilon)
+                {
+                    if (val < 0)
+                        sb.Append('-');
+                }
+                else
+                {
+                    sb.Append(val);
+                }
+                if (i > 0)
+                    sb.Append('x');
+                if (i > 1)
+                    sb.Append('^').Append(i);
+            }
+            if (sb.Length == 0)
+                sb.Append('0');
+            return sb.ToString();
+        }
 
-		public override bool Equals(object obj)
-		{
-			if (ReferenceEquals(obj, this)) return true;
-			var p = obj as Polynomial;
-			if (p == null) return false;
-			if (coefficients.Length != p.coefficients.Length) return false;
-			for (int i = 0; i < coefficients.Length; i++)
-				if (Math.Abs(coefficients[i] - p.coefficients[i]) > Epsilon) return false;
-			return true;
-		}
-
-		#endregion
-	}
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(obj, this)) return true;
+            var p = obj as Polynomial;
+            if (p == null) return false;
+            if (coefficients.Length != p.coefficients.Length) return false;
+            for (int i = 0; i < coefficients.Length; i++)
+                if (Math.Abs(coefficients[i] - p.coefficients[i]) > Epsilon) return false;
+            return true;
+        }
+        #endregion
+    }
 
 #pragma warning restore 659
 }
