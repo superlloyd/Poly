@@ -175,6 +175,7 @@ namespace BRPWorld.Utils.Utils
                 }
                 lp = next;
             }
+            result1.Reverse(); // make 2nd curve same orientation
             return new[] { result0.ToArray(), result1.ToArray() };
         }
         /// <summary>
@@ -219,6 +220,7 @@ namespace BRPWorld.Utils.Utils
                 }
                 lp = next;
             }
+            result1.Reverse(); // make 2nd curve same orientation
             return new[] { result0.ToArray(), result1.ToArray() };
         }
     }
