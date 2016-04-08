@@ -40,6 +40,26 @@ namespace BRPWorld.Utils.Utils
         }
         public static Polynomial X() { return new Polynomial(0, 1); }
 
+        #region IsReadonly
+
+        /// <summary>
+        /// Useful for class that want to expose internal value that must not change.
+        /// </summary>
+        public bool IsReadonly
+        {
+            get { return isReadonly; }
+            set
+            {
+                if (IsReadonly)
+                    return;
+                if (value)
+                    isReadonly = true;
+            }
+        }
+        bool isReadonly;
+
+        #endregion
+
         #region Order, this[]
 
         public int Order { get { return this.coefficients.Length - 1; } }
@@ -56,6 +76,8 @@ namespace BRPWorld.Utils.Utils
             }
             set
             {
+                if (IsReadonly)
+                    throw new InvalidOperationException("Readonly polynomial");
                 if (index < 0 || index > coefficients.Length)
                     throw new ArgumentOutOfRangeException();
                 coefficients[index] = value;

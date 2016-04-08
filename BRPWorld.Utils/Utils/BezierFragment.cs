@@ -9,42 +9,14 @@ using System.Windows;
 namespace BRPWorld.Utils.Utils
 {
     /// <summary>
-    /// Utility class about 2D Bezier curves. Representing either a 2,3 or 4 control point bezier curve. 
+    /// Utility class about 2D Bezier curves
     /// Aka a segment, or quadratic or cubic bezier curve.
     /// Extensive Bezier explanation can be found at http://pomax.github.io/bezierinfo/
     /// </summary>
     public class BezierFragment
     {
         Point[] controlPoints;
-        Polynomial curveX, curveY;
 
-        /// <summary>
-        /// Create a segment
-        /// </summary>
-        public BezierFragment(Point start, Point end)
-        {
-            controlPoints = new Point[] { start, end };
-            curveX = Line(start.X, end.X);
-            curveY = Line(start.Y, end.Y);
-        }
-        /// <summary>
-        /// Create a quadratic Bezier curve
-        /// </summary>
-        public BezierFragment(Point start, Point cp, Point end)
-        {
-            controlPoints = new Point[] { start, cp, end };
-            curveX = Quadratic(start.X, cp.X, end.X);
-            curveY = Quadratic(start.Y, cp.Y, end.Y);
-        }
-        /// <summary>
-        /// Create a cubic Bezier curve
-        /// </summary>
-        public BezierFragment(Point start, Point cp1, Point cp2, Point end)
-        {
-            controlPoints = new Point[] { start, cp1, cp2, end };
-            curveX = Cubic(start.X, cp1.X, cp2.X, end.X);
-            curveY = Cubic(start.Y, cp1.Y, cp2.Y, end.Y);
-        }
         /// <summary>
         /// Create a linear, quadratic or cubic Bezier curve
         /// </summary>
@@ -52,17 +24,53 @@ namespace BRPWorld.Utils.Utils
         /// <param name="end"></param>
         public BezierFragment(params Point[] ps)
         {
+            if (ps == null)
+                throw new ArgumentNullException();
+            if (ps.Length < 2)
+                throw new ArgumentException("Bezier curve need at least 2 points (segment).");
             controlPoints = ps;
-            curveX = Bezier(ps.Select(p => p.X).ToArray());
-            curveY = Bezier(ps.Select(p => p.Y).ToArray());
         }
+
+        #region Compute() CurveX CurveY
 
         public Point Compute(double t)
         {
-            var x = curveX.Compute(t);
-            var y = curveY.Compute(t);
+            var x = CurveX.Compute(t);
+            var y = CurveY.Compute(t);
             return new Point(x, y);
         }
+
+        public Polynomial CurveX
+        {
+            get
+            {
+                if (mCurveX == null)
+                {
+                    mCurveX = Bezier(controlPoints.Select(p => p.X).ToArray());
+                    mCurveX.IsReadonly = true;
+                }
+                return mCurveX;
+            }
+        }
+        Polynomial mCurveX;
+
+        public Polynomial CurveY
+        {
+            get
+            {
+                if (mCurveY == null)
+                {
+                    mCurveY = Bezier(controlPoints.Select(p => p.Y).ToArray());
+                    mCurveY.IsReadonly = true;
+                }
+                return mCurveY;
+            }
+        }
+        Polynomial mCurveY;
+
+        #endregion
+
+        #region ControlPoints
 
         public class ReadonlyPoints : IReadOnlyList<Point>
         {
@@ -89,15 +97,24 @@ namespace BRPWorld.Utils.Utils
         }
         ReadonlyPoints roPoints;
 
+        #endregion
+
         #region basic static operations
 
-        public static Polynomial Bezier(params double[] ps)
+        public static Polynomial Bezier(params double[] values)
         {
-            if (ps.Length == 2) return Line(ps[0], ps[1]);
-            else if (ps.Length == 3) return Quadratic(ps[0], ps[1], ps[2]);
-            else if (ps.Length == 4) return Cubic(ps[0], ps[1], ps[2], ps[3]);
-            else throw new NotSupportedException();
+            if (values == null || values.Length < 1)
+                throw new ArgumentNullException();
+            return Bezier(0, values.Length - 1, values);
         }
+        static Polynomial Bezier(int from, int to, double[] values)
+        {
+            if (from == to)
+                return new Polynomial(values[from]);
+            return OneMinusT * Bezier(from, to - 1, values) + T * Bezier(from + 1, to, values);
+        }
+        static readonly Polynomial T = new Polynomial(0, 1);
+        static readonly Polynomial OneMinusT = 1 - T;
 
         public static Polynomial Line(double p0, double p1)
         {
@@ -113,28 +130,6 @@ namespace BRPWorld.Utils.Utils
         {
             var T = new Polynomial(0, 1);
             return (1 - T) * Quadratic(p0, p1, p2) + T * Quadratic(p1, p2, p3);
-        }
-        public static IEnumerable<Point> SnapRotate(Point p0, Point p1, params Point[] points) { return SnapRotate(p0, p1, (IEnumerable<Point>)points); }
-        public static IEnumerable<Point> SnapRotate(Point p0, Point p1, IEnumerable<Point> points)
-        {
-            if (points == null)
-                yield break;
-
-            p1 = new Point(p1.X - p0.X, p1.Y - p0.Y);
-            p0 = new Point();
-
-            var r = Math.Sqrt(p1.X * p1.X + p1.Y * p1.Y);
-            if (r < Polynomial.Epsilon)
-                foreach (var p in points)
-                    yield return p;
-
-            // get rotation angle
-            var cos = p1.X / r;
-            var sin = p1.Y / r;
-
-            // now rotate by "- angle"
-            foreach (var p in points)
-                yield return new Point(cos * p.X + sin * p.Y, -sin * p.X + cos * p.Y);
         }
 
         #endregion
@@ -153,8 +148,8 @@ namespace BRPWorld.Utils.Utils
             }
             else
             {
-                GetMinMax(out x0, out x1, Bezier01.Concat(curveX.Derivate().SolveRealRoots().Where(t => t >= 0 && t <= 1)).Select(t => curveX.Compute(t)));
-                GetMinMax(out y0, out y1, Bezier01.Concat(curveY.Derivate().SolveRealRoots().Where(t => t >= 0 && t <= 1)).Select(t => curveY.Compute(t)));
+                GetMinMax(out x0, out x1, Bezier01.Concat(CurveX.Derivate().SolveRealRoots().Where(t => t >= 0 && t <= 1)).Select(t => CurveX.Compute(t)));
+                GetMinMax(out y0, out y1, Bezier01.Concat(CurveY.Derivate().SolveRealRoots().Where(t => t >= 0 && t <= 1)).Select(t => CurveY.Compute(t)));
             }
             return new Rect(x0, y0, x1 - x0, y1 - y0);
         }
@@ -191,7 +186,7 @@ namespace BRPWorld.Utils.Utils
         /// </summary>
         public BezierFragment[] Split(double t)
         {
-            if (t <= 0 || t >= 1)
+            if (t < 0 || t > 1)
                 throw new ArgumentOutOfRangeException();
             // http://pomax.github.io/bezierinfo/#decasteljau
             var r0 = new List<Point>();
@@ -212,7 +207,7 @@ namespace BRPWorld.Utils.Utils
                 }
                 lp = next;
             }
-            return new[] { new BezierFragment(r0.ToArray()), new BezierFragment(r0.ToArray()) };
+            return new[] { new BezierFragment(r0.ToArray()), new BezierFragment(r1.ToArray()) };
         }
         public BezierFragment[] Split(params double[] ts) { return Split((IEnumerable<double>)ts); }
         public BezierFragment[] Split(IEnumerable<double> ts)
@@ -244,8 +239,8 @@ namespace BRPWorld.Utils.Utils
 
         public Polynomial ParameterizedSquareDistance(Point p)
         {
-            var vx = curveX - p.X;
-            var vy = curveY - p.Y;
+            var vx = CurveX - p.X;
+            var vy = CurveY - p.Y;
             return vx * vx + vy * vy;
         }
 
