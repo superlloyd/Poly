@@ -357,7 +357,15 @@ namespace BRPWorld.Utils.Utils
 
         #endregion
 
-        #region SolveRealRoots()
+        #region SolveRealRoots() SolveOrFindRealRoots()
+
+        public bool CanSolveRealRoot()
+        {
+            var o = RealOrder();
+            if (o <= 4)
+                return true;
+            return false;
+        }
 
         /// <summary>
         /// This will solve analytically polynomial up to 4th order
@@ -449,9 +457,51 @@ namespace BRPWorld.Utils.Utils
                     break;
                 case 4:
                     {
-                        // https://en.wikipedia.org/wiki/Quartic_function
-                        throw new NotImplementedException("yet");
+                        // https://en.wikipedia.org/wiki/Quartic_function#General_formula_for_roots
+                        // x^4 + b x^3 + c x^2 + d x + e = 0
+                        var b = poly[3] / poly[4];
+                        var c = poly[2] / poly[4];
+                        var d = poly[1] / poly[4];
+                        var e = poly[0] / poly[4];
+                        // <=> y^4 + p x^2 + q x + r = 0, 
+                        // where x = y - b / 4
+                        var p = c - 3 * b * b / 8;
+                        var q = (b * b * b - 4 * b * c + 8 * d) / 8;
+                        var r = (-3 * b * b * b * b + 256 * e - 64 * b * d + 16 * b * b * c) / 256;
+                        if (Math.Abs(q) <= Epsilon)
+                        {
+                            // z = y^2, x = +/- sqrt(z) - b/4, z^2 + p z + r = 0
+                            foreach (var z in SolveRealRoots(r, p, 1))
+                            {
+                                if (z < -Epsilon)
+                                {
+                                    continue;
+                                }
+                                if (z <= Epsilon)
+                                {
+                                    yield return -b / 4;
+                                    continue;
+                                }
+                                var y = Math.Sqrt(z);
+                                yield return y - b / 4;
+                                yield return -y - b / 4;
+                            }
+                            yield break;
+                        }
+                        // <=> (y^2 + p + m)^2 = (p + 2m) y^2 -q y + (m^2 + 2 m p + p^2 - r)
+                        // where m is **arbitrary** choose it to make perfect square
+                        // i.e. m^3 + 5/2 p m^2 + (2 p^2 - r) m + (p^3/2 - p r /2 - q^2 / 8) = 0
+                        var m = SolveRealRoots(p * p * p / 2 - p * r / 2 - q * q / 8, 2 * p * p - r, 5.0 / 2.0 * p, 1)
+                            .Where(x => p + 2 * x > Epsilon)
+                            .First();
+                        // <=> (y^2 + y Sqrt(p+2m) + p+m - q/2/sqrt(p+2m)) (y^2 - y Sqrt(p+2m) + p+m + q/2/sqrt(p+2m))
+                        var sqrt = Math.Sqrt(p + 2 * m);
+                        var poly1 = SolveRealRoots(p + m - q / 2 / sqrt, sqrt, 1);
+                        var poly2 = SolveRealRoots(p + m + q / 2 / sqrt, -sqrt, 1);
+                        foreach (var y in poly1.Concat(poly2))
+                            yield return y - b / 4;
                     }
+                    break;
                 default:
                     throw new NotSupportedException();
             }
@@ -471,6 +521,17 @@ namespace BRPWorld.Utils.Utils
             if (x > max)
                 return max;
             return x;
+        }
+
+        /// <summary>
+        /// Will try to solve root analytically, and if it can will use numerical approach.
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<double> SolveOrFindRealRoot()
+        {
+            if (CanSolveRealRoot())
+                return SolveRealRoots();
+            return FindRoots().Where(c => Math.Abs(c.Imaginary) < Epsilon).Select(c => c.Real);
         }
 
         #endregion

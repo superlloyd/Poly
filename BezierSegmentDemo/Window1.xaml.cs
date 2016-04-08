@@ -46,8 +46,8 @@ namespace BezierSegmentDemo
 
 		void UpdateMeasure()
 		{
-			var bezier = Bezier.Cubic(figure.StartPoint, figure.StartBezierPoint, figure.EndBezierPoint, figure.EndPoint);
-			MeasureMessage = string.Format("Distance to Curve: {0}", bezier.DistanceTo(MeasurePoint.ToArray(), 0, 1));
+			var bezier = new BezierFragment(figure.StartPoint, figure.StartBezierPoint, figure.EndBezierPoint, figure.EndPoint);
+			MeasureMessage = string.Format("Distance to Curve: {0}", bezier.DistanceTo(MeasurePoint));
 			OnPropertyChanged("MeasureMessage");
 		}
 		public string MeasureMessage { get; set; }
@@ -178,24 +178,19 @@ namespace BezierSegmentDemo
 
 		public void UpdatePoints()
 		{
-			var bp = Bezier.Cubic(
+			var bp = new BezierFragment(
 				figure.StartPoint, 
 				figure.StartBezierPoint,
 				figure.EndBezierPoint,
 				figure.EndPoint
 			);
-            BezierBounds = Bezier.BoundingBox(
-                figure.StartPoint,
-                figure.StartBezierPoint,
-                figure.EndBezierPoint,
-                figure.EndPoint
-            );
+            BezierBounds = bp.BoundingBox();
 			overlay.Children.Clear();
 			var dt = 1.0 / NumPoints;
 			for (int i = 0; i <= NumPoints; i++)
 			{
 				var t = i * dt;
-				var p = PolygonUtils.PointFromArray(bp.Compute(t));
+				var p = bp.Compute(t);
 				var it = new ThumbPoint { Point = p, Background = Brushes.CornflowerBlue };
 				overlay.Children.Add(it);
 			}
@@ -204,27 +199,28 @@ namespace BezierSegmentDemo
         }
         public void UpdateCuts()
         {
-            var split = Bezier.Split(CutPoint, 
+            var bf = new BezierFragment(
                 figure.StartPoint,
                 figure.StartBezierPoint,
                 figure.EndBezierPoint,
                 figure.EndPoint);
+            var split = bf.Split(CutPoint);
 
             var first = new BezierFigure
             {
                 Foreground = Brushes.Red,
-                StartPoint = split[0][0],
-                StartBezierPoint = split[0][1],
-                EndBezierPoint = split[0][2],
-                EndPoint = split[0][3],
+                StartPoint = split[0].ControlPoints[0],
+                StartBezierPoint = split[0].ControlPoints[1],
+                EndBezierPoint = split[0].ControlPoints[2],
+                EndPoint = split[0].ControlPoints[3],
             };
             var last = new BezierFigure
             {
                 Foreground = Brushes.Blue,
-                StartPoint = split[1][0],
-                StartBezierPoint = split[1][1],
-                EndBezierPoint = split[1][2],
-                EndPoint = split[1][3],
+                StartPoint = split[1].ControlPoints[0],
+                StartBezierPoint = split[1].ControlPoints[1],
+                EndBezierPoint = split[1].ControlPoints[2],
+                EndPoint = split[1].ControlPoints[3],
             };
             overlay2.Children.Clear();
             overlay2.Children.Add(first);
