@@ -381,7 +381,7 @@ namespace BRPWorld.Utils.Utils
 
         #region SolveRealRoots() SolveOrFindRealRoots()
 
-        public bool CanSolveRealRoot()
+        public bool CanSolveRealRoots()
         {
             var o = RealOrder();
             if (o <= 4)
@@ -549,9 +549,9 @@ namespace BRPWorld.Utils.Utils
         /// Will try to solve root analytically, and if it can will use numerical approach.
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<double> SolveOrFindRealRoot()
+        public IEnumerable<double> SolveOrFindRealRoots()
         {
-            if (CanSolveRealRoot())
+            if (CanSolveRealRoots())
                 return SolveRealRoots();
             return FindRoots().Where(c => Math.Abs(c.Imaginary) < Epsilon).Select(c => c.Real);
         }
@@ -581,6 +581,34 @@ namespace BRPWorld.Utils.Utils
                 res += ys[i] * e;
             }
             return res.Trim();
+        }
+
+        #endregion
+
+        #region GetMinMax()
+
+        public void GetMinMax(double x0, double x1, out double minY, out double maxY)
+        {
+            var points = Derivate().SolveOrFindRealRoots().Where(t => t > x0 && t < x1).Concat(new[] { x0, x1 });
+            bool first = true;
+            minY = 0;
+            maxY = 0;
+            foreach (var t in points)
+            {
+                var y = Compute(t);
+                if (first)
+                {
+                    first = false;
+                    minY = maxY = y;
+                }
+                else
+                {
+                    if (y < minY)
+                        minY = y;
+                    if (y > maxY)
+                        maxY = y;
+                }
+            }
         }
 
         #endregion

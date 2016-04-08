@@ -17,18 +17,17 @@ namespace BRPWorld.Utils.Utils
     {
         Point[] controlPoints;
 
-        /// <summary>
-        /// Create a linear, quadratic or cubic Bezier curve
-        /// </summary>
-        /// <param name="start"></param>
-        /// <param name="end"></param>
-        public BezierFragment(params Point[] ps)
+        public BezierFragment(IEnumerable<Point> points)
+            : this(points.ToArray())
         {
-            if (ps == null)
+        }
+        public BezierFragment(params Point[] points)
+        {
+            if (points == null)
                 throw new ArgumentNullException();
-            if (ps.Length < 2)
+            if (points.Length < 2)
                 throw new ArgumentException("Bezier curve need at least 2 points (segment).");
-            controlPoints = ps;
+            controlPoints = points;
         }
 
         #region Compute() CurveX CurveY
@@ -134,47 +133,20 @@ namespace BRPWorld.Utils.Utils
 
         #endregion
 
-        internal static readonly double[] Bezier01 = new double[] { 0, 1 };
-
         #region BoundingBox()
 
         public Rect BoundingBox()
         {
-            double x0, x1, y0, y1;
-            if (controlPoints.Length == 2)
+            if (bounds.IsEmpty)
             {
-                GetMinMax(out x0, out x1, controlPoints[0].X, controlPoints[1].X);
-                GetMinMax(out y0, out y1, controlPoints[0].Y, controlPoints[1].Y);
+                double x0, x1, y0, y1;
+                CurveX.GetMinMax(0, 1, out x0, out x1);
+                CurveY.GetMinMax(0, 1, out y0, out y1);
+                bounds = new Rect(x0, y0, x1 - x0, y1 - y0);
             }
-            else
-            {
-                GetMinMax(out x0, out x1, Bezier01.Concat(CurveX.Derivate().SolveRealRoots().Where(t => t >= 0 && t <= 1)).Select(t => CurveX.Compute(t)));
-                GetMinMax(out y0, out y1, Bezier01.Concat(CurveY.Derivate().SolveRealRoots().Where(t => t >= 0 && t <= 1)).Select(t => CurveY.Compute(t)));
-            }
-            return new Rect(x0, y0, x1 - x0, y1 - y0);
+            return bounds;
         }
-        internal static bool GetMinMax(out double min, out double max, params double[] numbers) { return GetMinMax(out min, out max, (IEnumerable<double>)numbers); }
-        internal static bool GetMinMax(out double min, out double max, IEnumerable<double> numbers)
-        {
-            min = max = 0;
-            bool first = true;
-            foreach (var x in numbers)
-            {
-                if (first)
-                {
-                    first = false;
-                    min = max = x;
-                }
-                else
-                {
-                    if (x < min)
-                        min = x;
-                    else if (x > max)
-                        max = x;
-                }
-            }
-            return !first;
-        }
+        Rect bounds = Rect.Empty;
 
         #endregion
 
@@ -214,7 +186,7 @@ namespace BRPWorld.Utils.Utils
         {
             if (ts == null)
                 return new[] { this };
-            var filtered = ts.Where(t => t > 0 && t < 1).Distinct().OrderBy(t => t).ToList();
+            var filtered = ts.Where(t => t >= 0 && t <= 1).Distinct().OrderBy(t => t).ToList();
             if (filtered.Count == 0)
                 return new[] { this };
 
@@ -248,7 +220,7 @@ namespace BRPWorld.Utils.Utils
         {
             var dsquare = ParameterizedSquareDistance(point);
             var deriv = dsquare.Derivate().Normalize();
-            var derivRoots = deriv.SolveOrFindRealRoot();
+            var derivRoots = deriv.SolveOrFindRealRoots();
             return derivRoots
                 .Where(t => t > 0 && t < 1)
                 .Concat(Bezier01)
@@ -260,7 +232,7 @@ namespace BRPWorld.Utils.Utils
         {
             var dsquare = ParameterizedSquareDistance(point);
             var deriv = dsquare.Derivate().Normalize();
-            var derivRoots = deriv.SolveOrFindRealRoot();
+            var derivRoots = deriv.SolveOrFindRealRoots();
             return derivRoots
                 .Where(t => t > 0 && t < 1)
                 .Concat(Bezier01)
@@ -268,6 +240,8 @@ namespace BRPWorld.Utils.Utils
                 .OrderBy(x => x)
                 .First();
         }
+
+        static readonly double[] Bezier01 = new double[] { 0, 1 };
 
         #endregion
     }
